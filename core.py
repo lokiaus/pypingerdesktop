@@ -1,11 +1,35 @@
 import time
 import logging
 from ping3 import ping
+import asyncio
 
 logging.basicConfig(filename='pinger.log', encoding='utf-8', level=logging.DEBUG)
 
 
-def avg_ping(target_host, count=5):
+async def main():
+    choice = input("p/q: ")
+    if choice == "p":
+        print(f"Pinging...")
+        ping_data = await avg_ping("google.com")
+
+        if ping_data['Success']:
+            print(f"Min/Max/Avg RTT = {ping_data['MinRTT']} / {ping_data['MaxRTT']} / {ping_data['AvgRTT']}, "
+                  f"Packet Loss = {ping_data['PacketLoss']}%")
+        else:
+            print("Ping failed!")
+
+        logging.info(f"{time.asctime(time.localtime())}  "
+                     f"Min/Max/Avg RTT = {ping_data['MinRTT']} / {ping_data['MaxRTT']} / {ping_data['AvgRTT']}  "
+                     f"Packet Loss: {ping_data['PacketLoss']}%  "
+                     f"Success: {ping_data['Success']}")
+
+        # await asyncio.sleep(15)
+
+    elif choice == "q":
+        exit()
+
+
+async def avg_ping(target_host, count=5):
     """
 
     Args:
@@ -28,7 +52,7 @@ def avg_ping(target_host, count=5):
             rtt.append(init)
             # print(f"{round(rtt[-1], 1)}ms")
             # logging.info(f'Ping received from {target_host} in {round(rtt[-1], 1)}ms')
-        time.sleep(0.5)
+        await asyncio.sleep(0.2)  # adjust for testing
 
     if len(rtt) != 0:
         avg_rtt = round(sum(rtt) / len(rtt), 1)
@@ -41,9 +65,9 @@ def avg_ping(target_host, count=5):
         }
     else:
         return {
-            'AvgRTT': "0ms",
-            'MaxRTT': "0ms",
-            'MinRTT': "0ms",
+            'AvgRTT': f"0ms",
+            'MaxRTT': f"0ms",
+            'MinRTT': f"0ms",
             'PacketLoss': 100,
             'Success': False,
         }
